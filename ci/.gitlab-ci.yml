@@ -1,0 +1,24 @@
+stages:
+  - deploy-agent
+
+variables:
+  AGENT_IMAGE: "agent-deploy:latest"
+
+deploy-agent-run:
+  stage: deploy-agent
+  image: $AGENT_IMAGE
+  variables:
+    AGENT_DEPLOY_DATABASE_URL: $DATABASE_URL
+    AGENT_DEPLOY_ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
+    AGENT_DEPLOY_GITLAB_TOKEN: $CI_JOB_TOKEN
+    AGENT_DEPLOY_GITLAB_PROJECT_ID: $CI_PROJECT_ID
+    AGENT_DEPLOY_GITLAB_TRIGGER_TOKEN: $TRIGGER_TOKEN
+  script:
+    - python -m agent_deploy run
+        --deploy-id "$DEPLOY_ID"
+        --trigger "$TRIGGER_TYPE"
+        --resume-data "$RESUME_DATA"
+  rules:
+    - if: $DEPLOY_ID
+      when: always
+  allow_failure: false

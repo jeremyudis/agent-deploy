@@ -1,0 +1,38 @@
+pipeline {
+    agent {
+        docker {
+            image 'agent-deploy:latest'
+        }
+    }
+
+    parameters {
+        string(name: 'DEPLOY_ID', description: 'Deploy ID')
+        string(name: 'TRIGGER_TYPE', defaultValue: 'start', description: 'Trigger type: start | resume | cron')
+        string(name: 'RESUME_DATA', defaultValue: '', description: 'JSON-encoded resume payload')
+    }
+
+    environment {
+        AGENT_DEPLOY_DATABASE_URL     = credentials('agent-deploy-db-url')
+        AGENT_DEPLOY_ANTHROPIC_API_KEY = credentials('anthropic-api-key')
+        AGENT_DEPLOY_JENKINS_URL      = "${env.JENKINS_URL}"
+    }
+
+    stages {
+        stage('Run Deploy Agent') {
+            steps {
+                sh """
+                    python -m agent_deploy run \
+                        --deploy-id "${params.DEPLOY_ID}" \
+                        --trigger "${params.TRIGGER_TYPE}" \
+                        --resume-data '${params.RESUME_DATA}'
+                """
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "Deploy agent run failed for ${params.DEPLOY_ID}"
+        }
+    }
+}
