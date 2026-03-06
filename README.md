@@ -86,7 +86,7 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    start([START]) --> select_rc[select_rc]
+    start_node([START]) --> select_rc[select_rc]
     select_rc --> changelog[generate_changelog]
     changelog --> baseline[capture_baseline]
     baseline --> deploy[deploy_region]
@@ -106,8 +106,8 @@ flowchart TD
     promote -- "more regions remain" --> deploy
     promote -- "last region complete" --> post[post_deploy]
 
-    rollback --> end([END])
-    post --> end
+    rollback --> done_node([END])
+    post --> done_node
 ```
 
 ### Sequence diagram (happy path + approval)
@@ -419,4 +419,3 @@ These points reflect current behavior in code:
    - `SlackNotifier` sends action IDs `deploy_approve` / `deploy_reject`.
    - Webhook handler expects `approve_deploy` / `reject_deploy`.
    - Webhook handler parses `action.value` as JSON with `deploy_id`/`region`, while notifier currently sends plain `deploy_id` string.
-
